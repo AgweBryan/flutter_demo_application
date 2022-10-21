@@ -25,10 +25,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Color passedColor = Colors.transparent;
-  Color initialStarColor = Colors.yellow;
-  bool isRedDraggable = true;
-  bool isGreenDraggable = false;
+  double top = 10;
+  double left = 5;
+  double draggingX = 0;
+  double draggingY = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,81 +44,76 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.all(25),
               height: MediaQuery.of(context).size.height * .5,
               width: double.infinity,
-              child: GridView(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                children: [
-                  MyBox(
-                    backgroundColor: Colors.red,
-                    child: isRedDraggable
-                        ? Draggable<Color>(
-                            data: Colors.yellow,
-                            feedback: Icon(
-                              Icons.star,
-                              color: Colors.yellow,
-                              size: 150,
-                            ),
-                            childWhenDragging: SizedBox(),
-                            child: Icon(
-                              Icons.star,
-                              color: initialStarColor,
-                              size: 150,
-                            ))
-                        : DragTarget<Color>(
-                            onAccept: (data) => setState(() {
-                                  initialStarColor = data;
-                                  passedColor = Colors.transparent;
-                                  isRedDraggable = true;
-                                  isGreenDraggable = false;
-                                }),
-                            builder: (context, _, __) {
-                              return Icon(
-                                Icons.star,
-                                color: initialStarColor,
-                                size: 150,
-                              );
-                            }),
+              child: GestureDetector(
+                onHorizontalDragEnd: (details) {
+                  print("Entered this function!");
+                  if (draggingX > -7 &&
+                      draggingX < 27 &&
+                      draggingY > -5 &&
+                      draggingY < 29) {
+                    setState(() {
+                      top = 10;
+                      left = 5;
+                    });
+                  } else if (draggingX > 166 &&
+                      draggingX < 207 &&
+                      draggingY > 166 &&
+                      draggingY < 215) {
+                    setState(() {
+                      top = 181;
+                      left = 181;
+                    });
+                  } else {
+                    setState(() {
+                      top = 10;
+                      left = 5;
+                    });
+                  }
+                },
+                onHorizontalDragUpdate: (details) {
+                  setState(() {
+                    draggingY = details.localPosition.dy;
+                    draggingX = details.localPosition.dx;
+                    top = details.localPosition.dy;
+                    left = details.localPosition.dx;
+                  });
+                },
+                child: Stack(children: [
+                  GridView(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                    children: const [
+                      MyBox(
+                        backgroundColor: Colors.red,
+                      ),
+                      MyBox(
+                        backgroundColor: Colors.grey,
+                      ),
+                      MyBox(
+                        backgroundColor: Colors.grey,
+                      ),
+                      MyBox(
+                        backgroundColor: Colors.lightGreen,
+                      )
+                    ],
                   ),
-                  MyBox(
-                    backgroundColor: Colors.grey,
-                  ),
-                  MyBox(
-                    backgroundColor: Colors.grey,
-                  ),
-                  MyBox(
-                      backgroundColor: Colors.lightGreen,
-                      child: isGreenDraggable
-                          ? Draggable<Color>(
-                              data: Colors.yellow,
-                              feedback: Icon(
-                                Icons.star,
-                                color: Colors.yellow,
-                                size: 150,
-                              ),
-                              childWhenDragging: SizedBox(),
-                              child: Icon(
-                                Icons.star,
-                                color: passedColor,
-                                size: 150,
-                              ))
-                          : DragTarget<Color>(
-                              onAccept: (data) => setState(() {
-                                    passedColor = data;
-                                    initialStarColor = Colors.transparent;
-                                    isRedDraggable = false;
-                                    isGreenDraggable = true;
-                                  }),
-                              builder: (context, _, __) {
-                                return Icon(
-                                  Icons.star,
-                                  color: passedColor,
-                                  size: 150,
-                                );
-                              }))
-                ],
+                  Positioned(
+                    // top: 10,
+                    // left: 5,
+                    // top: 185,
+                    // left: 185,
+                    top: top,
+                    left: left,
+                    child: Icon(
+                      Icons.star,
+                      size: 150,
+                      color: Colors.yellow,
+                    ),
+                  )
+                ]),
               ),
             )
           ],
@@ -128,9 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class MyBox extends StatelessWidget {
   final Color backgroundColor;
-  final Widget? child;
-  const MyBox({Key? key, required this.backgroundColor, this.child})
-      : super(key: key);
+  const MyBox({Key? key, required this.backgroundColor}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +132,6 @@ class MyBox extends StatelessWidget {
       height: 140,
       color: backgroundColor,
       margin: EdgeInsets.all(5),
-      child: child ?? SizedBox(),
     );
   }
 }
